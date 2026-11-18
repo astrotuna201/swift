@@ -219,11 +219,12 @@ TypeConverter::Types_t::getCacheFor(bool isDependent, TypeConverter::Mode mode) 
           : IndependentCache[unsigned(mode)]);
 }
 
-llvm::DenseMap<TypeBase *, const TypeLayoutEntry *> &
+llvm::DenseMap<TypeBase *, TypeLayoutEntry *> &
 TypeConverter::Types_t::getTypeLayoutCacheFor(bool isDependent,
-                                              TypeConverter::Mode mode) {
+                                               TypeConverter::Mode mode,
+                                               bool useStructLayouts) {
   return (isDependent ? DependentTypeLayoutCache[unsigned(mode)]
-                      : IndependentTypeLayoutCache[unsigned(mode)]);
+                      : IndependentTypeLayoutCache[unsigned(mode)])[useStructLayouts ? 1 : 0];
 }
 
 void TypeInfo::assign(IRGenFunction &IGF, Address dest, Address src,
@@ -2196,10 +2197,17 @@ void TypeConverter::setGenericContext(CanGenericSignature signature) {
   Types.getCacheFor(/*isDependent*/ true, Mode::Legacy).clear();
   Types.getCacheFor(/*isDependent*/ true, Mode::CompletelyFragile).clear();
 
-  Types.getTypeLayoutCacheFor(/*isDependent*/ true, Mode::Normal).clear();
-  Types.getTypeLayoutCacheFor(/*isDependent*/ true, Mode::Legacy).clear();
-  Types.getTypeLayoutCacheFor(/*isDependent*/ true, Mode::CompletelyFragile)
-      .clear();
+  for (bool useStructLayouts : {false, true}) {
+    Types.getTypeLayoutCacheFor(/*isDependent*/ true, Mode::Normal,
+                                useStructLayouts)
+        .clear();
+    Types.getTypeLayoutCacheFor(/*isDependent*/ true, Mode::Legacy,
+                                useStructLayouts)
+        .clear();
+    Types.getTypeLayoutCacheFor(/*isDependent*/ true, Mode::CompletelyFragile,
+                                useStructLayouts)
+        .clear();
+  }
 }
 
 CanGenericSignature IRGenModule::getCurGenericContext() {
@@ -2638,19 +2646,20 @@ CanType TypeConverter::getExemplarType(CanType contextTy) {
     return CanType(exemplified);
   }
 }
-const TypeLayoutEntry
-&TypeConverter::getTypeLayoutEntry(SILType T, bool useStructLayouts) {
+TypeLayoutEntry
+*TypeConverter::getTypeLayoutEntry(SILType T, bool useStructLayouts) {
   auto astTy = T.getASTType();
-  auto cache =
-      Types.getTypeLayoutCacheFor(astTy->hasTypeParameter(), LoweringMode);
+  auto &cache =
+      Types.getTypeLayoutCacheFor(astTy->hasTypeParameter(), LoweringMode,
+                                  useStructLayouts);
   auto it = cache.find(astTy.getPointer());
   if (it != cache.end()) {
-    return *it->second;
+    return it->second;
   }
   auto *ti = getTypeEntry(T.getASTType());
   auto *entry = ti->buildTypeLayoutEntry(IGM, T, useStructLayouts);
   cache[astTy.getPointer()] = entry;
-  return *entry;
+  return entry;
 }
 
 const TypeInfo *TypeConverter::getTypeEntry(CanType canonicalTy) {

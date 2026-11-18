@@ -554,8 +554,7 @@ namespace {
         if (!fieldTy) {
           return IGM.typeLayoutCache.getOrCreateTypeInfoBasedEntry(*this, T);
         }
-        fields.push_back(
-            field.getTypeInfo().buildTypeLayoutEntry(IGM, fieldTy, useStructLayouts));
+        fields.push_back(IGM.getTypeLayoutEntry(fieldTy, useStructLayouts));
       }
       assert(!fields.empty() &&
              "Empty structs should not be LoadableClangRecordTypeInfo");
@@ -960,8 +959,7 @@ namespace {
         if (!fieldTy) {
           return IGM.typeLayoutCache.getOrCreateTypeInfoBasedEntry(*this, T);
         }
-        fields.push_back(
-            field.getTypeInfo().buildTypeLayoutEntry(IGM, fieldTy, useStructLayouts));
+        fields.push_back(IGM.getTypeLayoutEntry(fieldTy, useStructLayouts));
       }
       assert(!fields.empty() &&
              "Empty structs should not be AddressOnlyRecordTypeInfo");
@@ -1141,8 +1139,7 @@ namespace {
       std::vector<TypeLayoutEntry *> fields;
       for (auto &field : getFields()) {
         auto fieldTy = field.getType(IGM, T);
-        fields.push_back(
-            field.getTypeInfo().buildTypeLayoutEntry(IGM, fieldTy, useStructLayouts));
+        fields.push_back(IGM.getTypeLayoutEntry(fieldTy, useStructLayouts));
       }
 
       // if (fields.size() == 1 && isFixedSize() &&
@@ -1250,8 +1247,8 @@ namespace {
 
         auto likeType = T.getRawLayoutSubstitutedLikeType();
         auto loweredLikeType = IGM.getLoweredType(likeType);
-        auto likeTypeLayout = IGM.getTypeInfo(loweredLikeType)
-            .buildTypeLayoutEntry(IGM, loweredLikeType, useStructLayouts);
+        auto *likeTypeLayout =
+            IGM.getTypeLayoutEntry(loweredLikeType, useStructLayouts);
 
         // If we're an array, use the ArrayLayoutEntry.
         if (rawLayout->getArrayLikeTypeAndCount()) {
@@ -1269,8 +1266,7 @@ namespace {
       std::vector<TypeLayoutEntry *> fields;
       for (auto &field : getFields()) {
         auto fieldTy = field.getType(IGM, T);
-        fields.push_back(
-            field.getTypeInfo().buildTypeLayoutEntry(IGM, fieldTy, useStructLayouts));
+        fields.push_back(IGM.getTypeLayoutEntry(fieldTy, useStructLayouts));
       }
       assert(!fields.empty() &&
              "Empty structs should not be FixedStructTypeInfo");
@@ -1380,8 +1376,8 @@ namespace {
 
         auto likeType = T.getRawLayoutSubstitutedLikeType();
         auto loweredLikeType = IGM.getLoweredType(likeType->getCanonicalType());
-        auto likeTypeLayout = IGM.getTypeInfo(loweredLikeType)
-            .buildTypeLayoutEntry(IGM, loweredLikeType, useStructLayouts);
+        auto *likeTypeLayout =
+            IGM.getTypeLayoutEntry(loweredLikeType, useStructLayouts);
 
         // If we're an array, use the ArrayLayoutEntry.
         if (rawLayout->getArrayLikeTypeAndCount()) {
@@ -1407,8 +1403,7 @@ namespace {
       std::vector<TypeLayoutEntry *> fields;
       for (auto &field : getFields()) {
         auto fieldTy = field.getType(IGM, T);
-        fields.push_back(
-            field.getTypeInfo().buildTypeLayoutEntry(IGM, fieldTy, useStructLayouts));
+        fields.push_back(IGM.getTypeLayoutEntry(fieldTy, useStructLayouts));
       }
       assert(!fields.empty() &&
              "Empty structs should not be NonFixedStructTypeInfo");

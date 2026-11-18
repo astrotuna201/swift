@@ -3090,7 +3090,7 @@ void irgen::emitLazyTypeContextDescriptor(IRGenModule &IGM,
   auto lowered = getLoweredTypeInPrimaryContext(IGM, type);
   auto &ti = IGM.getTypeInfo(lowered);
   auto *typeLayoutEntry =
-      ti.buildTypeLayoutEntry(IGM, lowered, /*useStructLayouts*/ true);
+      IGM.getTypeLayoutEntry(lowered, /*useStructLayouts*/ true);
   if (layoutStringsEnabled(IGM)) {
 
     auto genericSig =
@@ -3868,9 +3868,8 @@ namespace {
       if (!layoutStringsEnabled(IGM))
         return nullptr;
       auto lowered = getLoweredTypeInPrimaryContext(IGM, Target);
-      auto &ti = IGM.getTypeInfo(lowered);
       auto *typeLayoutEntry =
-          ti.buildTypeLayoutEntry(IGM, lowered, /*useStructLayouts*/ true);
+          IGM.getTypeLayoutEntry(lowered, /*useStructLayouts*/ true);
       auto genericSig =
           lowered.getNominalDecl()->getGenericSignature();
 
@@ -4564,9 +4563,8 @@ namespace {
       if (!layoutStringsEnabled(IGM))
         return nullptr;
       auto lowered = getLoweredTypeInPrimaryContext(IGM, Target);
-      auto &ti = IGM.getTypeInfo(lowered);
       auto *typeLayoutEntry =
-          ti.buildTypeLayoutEntry(IGM, lowered, /*useStructLayouts*/ true);
+          IGM.getTypeLayoutEntry(lowered, /*useStructLayouts*/ true);
       auto genericSig =
           lowered.getNominalDecl()->getGenericSignature();
 

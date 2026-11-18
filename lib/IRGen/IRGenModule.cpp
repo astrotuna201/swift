@@ -2684,8 +2684,8 @@ TypeExpansionContext IRGenModule::getMaximalTypeExpansionContext() const {
   return getSILModule().getMaximalTypeExpansionContext();
 }
 
-const TypeLayoutEntry
-&IRGenModule::getTypeLayoutEntry(SILType T, bool useStructLayouts) {
+TypeLayoutEntry
+*IRGenModule::getTypeLayoutEntry(SILType T, bool useStructLayouts) {
   return Types.getTypeLayoutEntry(T, useStructLayouts);
 }
 

@@ -1807,8 +1807,8 @@ namespace {
 
       unsigned emptyCases = ElementsWithNoPayload.size();
       std::vector<TypeLayoutEntry *> nonEmptyCases;
-      nonEmptyCases.push_back(getPayloadTypeInfo().buildTypeLayoutEntry(
-          IGM, getPayloadType(IGM, T), useStructLayouts));
+      nonEmptyCases.push_back(
+          IGM.getTypeLayoutEntry(getPayloadType(IGM, T), useStructLayouts));
       return IGM.typeLayoutCache.getOrCreateEnumEntry(emptyCases, nonEmptyCases,
                                                       T, getTypeInfo());
     }
@@ -3927,7 +3927,7 @@ namespace {
             elt.decl, IGM.getSILModule(), IGM.getMaximalTypeExpansionContext());
 
         nonEmptyCases.push_back(
-            elt.ti->buildTypeLayoutEntry(IGM, eltPayloadType, useStructLayouts));
+            IGM.getTypeLayoutEntry(eltPayloadType, useStructLayouts));
       }
       return IGM.typeLayoutCache.getOrCreateEnumEntry(emptyCases, nonEmptyCases,
                                                       T, getTypeInfo());

@@ -423,18 +423,18 @@ conditionallyGetTypeLayoutEntry(IRGenModule &IGM, SILType concreteType) {
   if (!IGM.getOptions().UseTypeLayoutValueHandling)
     return nullptr;
 
-  auto &typeLayoutEntry = IGM.getTypeLayoutEntry(
+  auto *typeLayoutEntry = IGM.getTypeLayoutEntry(
     concreteType, IGM.getOptions().ForceStructTypeLayouts);
 
   // Don't use type layout based generation for layouts that contain a resilient
   // field but no archetype. We don't expect a speedup by using type layout
   // based ir generation.
-  if ((typeLayoutEntry.containsResilientField() &&
-       !typeLayoutEntry.containsArchetypeField()) ||
-      typeLayoutEntry.containsDependentResilientField())
+  if ((typeLayoutEntry->containsResilientField() &&
+       !typeLayoutEntry->containsArchetypeField()) ||
+      typeLayoutEntry->containsDependentResilientField())
     return nullptr;
 
-  return &typeLayoutEntry;
+  return typeLayoutEntry;
 }
 
 static const EnumTypeLayoutEntry *

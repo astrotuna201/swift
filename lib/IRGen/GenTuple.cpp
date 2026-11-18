@@ -318,8 +318,7 @@ namespace {
       std::vector<TypeLayoutEntry *> fields;
       for (auto &field : getFields()) {
         auto fieldTy = field.getType(IGM, T);
-        fields.push_back(
-            field.getTypeInfo().buildTypeLayoutEntry(IGM, fieldTy, useStructLayouts));
+        fields.push_back(IGM.getTypeLayoutEntry(fieldTy, useStructLayouts));
       }
       // if (fields.size() == 1) {
       //   return fields[0];
@@ -384,8 +383,7 @@ namespace {
       std::vector<TypeLayoutEntry *> fields;
       for (auto &field : getFields()) {
         auto fieldTy = field.getType(IGM, T);
-        fields.push_back(
-            field.getTypeInfo().buildTypeLayoutEntry(IGM, fieldTy, useStructLayouts));
+        fields.push_back(IGM.getTypeLayoutEntry(fieldTy, useStructLayouts));
       }
       // if (fields.size() == 1) {
       //   return fields[0];
@@ -466,8 +464,7 @@ namespace {
       std::vector<TypeLayoutEntry *> fields;
       for (auto &field : asImpl().getFields()) {
         auto fieldTy = field.getType(IGM, T);
-        fields.push_back(
-            field.getTypeInfo().buildTypeLayoutEntry(IGM, fieldTy, useStructLayouts));
+        fields.push_back(IGM.getTypeLayoutEntry(fieldTy, useStructLayouts));
       }
 
       if (fields.empty()) {

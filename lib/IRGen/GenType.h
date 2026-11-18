@@ -202,8 +202,7 @@ public:
   const TypeInfo *getTypeEntry(CanType type);
   const TypeInfo &getCompleteTypeInfo(CanType type);
 
-  const TypeLayoutEntry
-  &getTypeLayoutEntry(SILType T, bool useStructLayouts);
+  TypeLayoutEntry *getTypeLayoutEntry(SILType T, bool useStructLayouts);
   const LoadableTypeInfo &getNativeObjectTypeInfo();
   const LoadableTypeInfo &getUnknownObjectTypeInfo();
   const LoadableTypeInfo &getBridgeObjectTypeInfo();
@@ -270,16 +269,20 @@ private:
     llvm::DenseMap<TypeBase *, const TypeInfo *> IndependentCache[NumLoweringModes];
     llvm::DenseMap<TypeBase *, const TypeInfo *> DependentCache[NumLoweringModes];
 
-    llvm::DenseMap<TypeBase *, const TypeLayoutEntry *>
-        IndependentTypeLayoutCache[NumLoweringModes];
-    llvm::DenseMap<TypeBase *, const TypeLayoutEntry *>
-        DependentTypeLayoutCache[NumLoweringModes];
+    // Two layout caches per lowering mode: one for useStructLayouts=false
+    // (flat TypeInfo-based entries) and one for useStructLayouts=true
+    // (per-field struct-layout entries). The two must not share a cache,
+    // since the entry kind produced depends on the flag.
+    llvm::DenseMap<TypeBase *, TypeLayoutEntry *>
+        IndependentTypeLayoutCache[NumLoweringModes][2];
+    llvm::DenseMap<TypeBase *, TypeLayoutEntry *>
+        DependentTypeLayoutCache[NumLoweringModes][2];
 
   public:
     llvm::DenseMap<TypeBase *, const TypeInfo *> &getCacheFor(bool isDependent,
                                                               Mode mode);
-    llvm::DenseMap<TypeBase *, const TypeLayoutEntry *> &
-    getTypeLayoutCacheFor(bool isDependent, Mode mode);
+    llvm::DenseMap<TypeBase *, TypeLayoutEntry *> &
+    getTypeLayoutCacheFor(bool isDependent, Mode mode, bool useStructLayouts);
   };
   Types_t Types;
 };
