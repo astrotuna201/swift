@@ -128,20 +128,11 @@ func repeat_while_loop_nested(_ x: Float) -> Float {
 // DEBUG-NEXT:  [AD] The following active value is NOT loop-local, skipping:   %[[#B07:]] = begin_access [modify] [static] %[[#B01]] : $*Float
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   %[[#B08:]] = begin_access [read] [static] %[[#B00]] : $*Float
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#B09:]] = load [trivial] %[[#B08]] : $*Float
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#B09]] = load [trivial] %[[#B08]] : $*Float
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Float]
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#B09:]] = load [trivial] %[[#B08]] : $*Float
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   %[[#B10:]] = begin_access [read] [static] %[[#B01]] : $*Float
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#B11:]] = load [trivial] %[[#B10]] : $*Float
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#B11]] = load [trivial] %[[#B10]] : $*Float
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Float]
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#B12:]] = apply %[[#B13:]](%[[#B09]], %[[#B11]], %[[#B14:]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#B12]] = apply %[[#B13]](%[[#B09]], %[[#B11]], %[[#B14]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Float]
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#B11:]] = load [trivial] %[[#B10]] : $*Float
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#B12:]] = apply %[[#B13:]](%[[#B09]], %[[#B11]], %[[#B14:]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   %[[#B15:]] = begin_access [modify] [static] %[[#B00]] : $*Float
 
@@ -228,20 +219,11 @@ func repeat_while_loop_condition(_ x: Float) -> Float {
 // DEBUG-NEXT:  [AD] The following active value is NOT loop-local, skipping:   %[[#C00]] = alloc_stack [var_decl] $Float, var, name "result"
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   %[[#C01:]] = begin_access [read] [static] %[[#C00]] : $*Float
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#C02:]] = load [trivial] %[[#C01]] : $*Float
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#C02]] = load [trivial] %[[#C01]] : $*Float
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Float]
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#C02:]] = load [trivial] %[[#C01]] : $*Float
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   %[[#C03:]] = begin_access [read] [static] %[[#C00]] : $*Float
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#C04:]] = load [trivial] %[[#C03]] : $*Float
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#C04]] = load [trivial] %[[#C03]] : $*Float
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Float]
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#C05:]] = apply %[[#C06:]](%[[#C02]], %[[#C04]], %[[#C07:]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#C05]] = apply %[[#C06]](%[[#C02]], %[[#C04]], %[[#C07]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Float]
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#C04:]] = load [trivial] %[[#C03]] : $*Float
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#C05:]] = apply %[[#C06:]](%[[#C02]], %[[#C04]], %[[#C07:]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   %[[#]] = begin_access [modify] [static] %[[#C00]] : $*Float
 
@@ -250,14 +232,8 @@ func repeat_while_loop_condition(_ x: Float) -> Float {
 // DEBUG-NEXT:  [AD] The following active value is NOT loop-local, skipping:   %[[#C00]] = alloc_stack [var_decl] $Float, var, name "result"
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   %[[#C08:]] = begin_access [read] [static] %[[#C00]] : $*Float
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#C09:]] = load [trivial] %[[#C08]] : $*Float
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#C09]] = load [trivial] %[[#C08]] : $*Float
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Float]
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#C10:]] = apply %[[#C11:]](%[[#C09]], %[[#CARG0]], %[[#C12:]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#C10]] = apply %[[#C11]](%[[#C09]], %[[#CARG0]], %[[#C12]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Float]
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#C09:]] = load [trivial] %[[#C08]] : $*Float
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#C10:]] = apply %[[#C11:]](%[[#C09]], %[[#CARG0]], %[[#C12:]]) : $@convention(method) (Float, Float, @thin Float.Type) -> Float
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   %[[#]] = begin_access [modify] [static] %[[#C00]] : $*Float
 
@@ -294,20 +270,9 @@ pullback(at: [1, 2, 3], of: identity)(FloatArrayTan([4, -5, 6]))
 // DEBUG-NEXT:  [AD] Original bb2 belongs to a loop, original header bb1, pullback header bb3
 // DEBUG-NEXT:  [AD] The following active value is NOT loop-local, skipping: %[[#DARG0:]] = argument of bb0 : $Array<Float>
 // DEBUG-NEXT:  [AD] The following active value is NOT loop-local, skipping:   %[[#D0]] = alloc_stack [var_decl] $Array<Float>, var, name "results"
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   %[[#D1:]] = apply %[[#]]<Float>(%[[#]]) : $@convention(thin) <τ_0_0> (Builtin.Word) -> (@owned Array<τ_0_0>, Builtin.RawPointer)
-// DEBUG-NEXT:  [AD] Setting adjoint value for   %[[#D:]] = apply %[[#]]<Float>(%[[#]]) : $@convention(thin) <τ_0_0> (Builtin.Word) -> (@owned Array<τ_0_0>, Builtin.RawPointer)
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Array<Float>.DifferentiableView]
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header: (**%[[#D2:]]**, %[[#D3:]]) = destructure_tuple %[[#D1]] : $(Array<Float>, Builtin.RawPointer)
-// DEBUG-NEXT:  [AD] Setting adjoint value for (**%[[#D2]]**, %[[#D3]]) = destructure_tuple %[[#D1]] : $(Array<Float>, Builtin.RawPointer)
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Array<Float>.DifferentiableView]
-
-
-// DEBUG-NEXT:  [AD] The following active value is loop-local, zeroing its adjoint value in loop header:   [[AP1:%.*]] = apply [[F1:%.*]]<Float>(%[[#D2]]) : $@convention(thin) <τ_0_0> (@owned Array<τ_0_0>) -> @owned Array<τ_0_0>
-// DEBUG-NEXT:  [AD] Setting adjoint value for   [[AP1]] = apply [[F1]]<Float>(%[[#D2]]) : $@convention(thin) <τ_0_0> (@owned Array<τ_0_0>) -> @owned Array<τ_0_0>
-// DEBUG-NEXT:  [AD] No debug variable found.
-// DEBUG-NEXT:  [AD] The new adjoint value, replacing the existing one, is: Zero[$Array<Float>.DifferentiableView]
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   %[[#D1:]] = apply %[[#]]<Float>(%[[#]]) : $@convention(thin) <τ_0_0> (Builtin.Word) -> (@owned Array<τ_0_0>, Builtin.RawPointer)
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value: (**%[[#D2:]]**, %[[#D3:]]) = destructure_tuple %[[#D1]] : $(Array<Float>, Builtin.RawPointer)
+// DEBUG-NEXT:  [AD] The following active value is loop-local, defined outside the loop header, not zeroing its adjoint value:   [[AP1:%.*]] = apply [[F1:%.*]]<Float>(%[[#D2]]) : $@convention(thin) <τ_0_0> (@owned Array<τ_0_0>) -> @owned Array<τ_0_0>
 // DEBUG-NEXT:  [AD] The following active value is loop-local, checking if it's adjoint is a projection
 // DEBUG-NEXT:  [AD] Adjoint for the following value is a projection, skipping:   [[BA:%.*]] = begin_access [modify] [static] %[[#D0]] : $*Array<Float>
 // DEBUG-NEXT:  [AD] End search for adjoints of loop-local active values
