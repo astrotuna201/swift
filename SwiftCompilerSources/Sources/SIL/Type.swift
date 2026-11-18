@@ -247,38 +247,59 @@ public struct Type : TypeProperties, CustomStringConvertible, NoReflectionChildr
     return idx >= 0 ? idx : nil
   }
 
-  /// Returns true if this is an aggregate containing `otherType` - or is the same type.
+  /// Returns true if this is an aggregate containing `otherType` - or is the
+  /// same type.
   ///
-  /// Recurses into the element types of structs, tuples, enum payloads, and `Builtin.FixedArray`.
+  /// Recurses into the element types of structs, tuples, enum payloads, and
+  /// `Builtin.FixedArray`.
   public func aggregateIsOrContains(_ otherType: Type, in function: Function) -> Bool {
+    var visited: [Type: Bool] = [:]
+    return aggregateIsOrContains(otherType, in: function, visited: &visited)
+  }
+
+  private func aggregateIsOrContains(_ otherType: Type, in function: Function,
+                                     visited: inout [Type: Bool]) -> Bool {
+    // Subtypes shared by several positions of the enclosing type (e.g. the AD
+    // branch-tracing pred-enum chains, where both arms of a branch reference
+    // the same predecessor enum) are only ever visited once instead of once
+    // per position — the naive per-position recursion is exponential in the
+    // number of shared positions. A type that is currently being visited
+    // (a genuinely recursive type) is conservatively treated as not
+    // containing the target.
+    if let memo = visited[self] {
+      return memo
+    }
+    visited[self] = false
+    let result: Bool
     if self == otherType {
-      return true
-    }
-    if isStruct {
+      result = true
+    } else if isStruct {
       guard let fields = getNominalFields(in: function) else {
+        visited[self] = true
         return true
       }
-      return fields.contains { $0.aggregateIsOrContains(otherType, in: function) }
-    }
-    if isTuple {
-      return tupleElements.contains { $0.aggregateIsOrContains(otherType, in: function) }
-    }
-    if isEnum {
+      result = fields.contains { $0.aggregateIsOrContains(otherType, in: function, visited: &visited) }
+    } else if isTuple {
+      result = tupleElements.contains { $0.aggregateIsOrContains(otherType, in: function, visited: &visited) }
+    } else if isEnum {
       guard let cases = getEnumCases(in: function) else {
+        visited[self] = true
         return true
       }
-      return cases.contains { $0.payload?.aggregateIsOrContains(otherType, in: function) ?? false }
-    }
-    if isBuiltinFixedArray {
+      result = cases.contains { $0.payload?.aggregateIsOrContains(otherType, in: function, visited: &visited) ?? false }
+    } else if isBuiltinFixedArray {
       // Match the address-ness of `self` so TBAA callers that pass address
       // types recurse correctly into the element type.
       var elementType = builtinFixedArrayElementType(in: function)
       if isAddress {
         elementType = elementType.addressType
       }
-      return elementType.aggregateIsOrContains(otherType, in: function)
+      result = elementType.aggregateIsOrContains(otherType, in: function, visited: &visited)
+    } else {
+      result = false
     }
-    return false
+    visited[self] = result
+    return result
   }
 
   public func mapOutOfEnvironment(in function: Function) -> Type {

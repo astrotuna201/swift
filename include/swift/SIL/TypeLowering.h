@@ -710,6 +710,10 @@ class TypeConverter {
   /// Second element is a ResilienceExpansion.
   llvm::DenseMap<std::pair<SILType, unsigned>, unsigned> TypeFields;
 
+  /// Types currently being counted by countRawNumberOfInnerFields (re-entrancy
+  /// guard for recursive types).
+  llvm::DenseSet<SILType> TypeFieldsInProgress;
+
   /// Cache for TypeSubElementCount.
   llvm::DenseMap<std::pair<SILType, TypeExpansionContext>, unsigned> TypeSubElementCache;
 
@@ -846,6 +850,13 @@ public:
 
   /// Count the total number of fields inside the given SILType.
   unsigned countNumberOfFields(SILType Ty, TypeExpansionContext expansion);
+
+  /// Count the total number of fields inside the given SILType, memoized per
+  /// (type, expansion) and safe for types shared by several positions of an
+  /// enclosing type (see countRawNumberOfInnerFields for the rationale).
+  /// Unlike countNumberOfFields the result may be zero.
+  unsigned countRawNumberOfInnerFields(SILType Ty,
+                                       TypeExpansionContext expansion);
 
   /// Count number of sub-elements inside the given SILType.
   ///

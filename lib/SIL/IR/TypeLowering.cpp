@@ -5964,12 +5964,13 @@ static void countNumberOfInnerFields(unsigned &fieldsCount, TypeConverter &TC,
         "types at all");
     for (auto *prop : structDecl->getStoredProperties()) {
       SILType propTy = Ty.getFieldType(prop, TC, expansion);
-      unsigned fieldsCountBefore = fieldsCount;
-      countNumberOfInnerFields(fieldsCount, TC, propTy, expansion);
-      if (fieldsCount == fieldsCountBefore) {
+      unsigned propFields = TC.countRawNumberOfInnerFields(propTy, expansion);
+      if (propFields == 0) {
         // size of Struct(BigStructType) == size of BigStructType()
         // prevent counting its size as BigStructType()+1
         ++fieldsCount;
+      } else {
+        fieldsCount += propFields;
       }
     }
     return;
@@ -5977,7 +5978,7 @@ static void countNumberOfInnerFields(unsigned &fieldsCount, TypeConverter &TC,
   if (auto tupleTy = Ty.getAs<TupleType>()) {
     for (auto elt : tupleTy.getElementTypes()) {
       auto silElt = SILType::getPrimitiveObjectType(elt);
-      countNumberOfInnerFields(fieldsCount, TC, silElt, expansion);
+      fieldsCount += TC.countRawNumberOfInnerFields(silElt, expansion);
     }
     return;
   }
@@ -6013,10 +6014,10 @@ static void countNumberOfInnerFields(unsigned &fieldsCount, TypeConverter &TC,
       // Number of fields > 1 as "future proof" for this heuristic:
       // In case it is used by a pass that tries to explode enums.
       auto payloadTy = Ty.getEnumElementType(elt, TC, expansion);
-      fieldsCount = 0;
-      countNumberOfInnerFields(fieldsCount, TC, payloadTy, expansion);
-      if (fieldsCount > maxEnumCount) {
-        maxEnumCount = fieldsCount;
+      unsigned payloadFields =
+          TC.countRawNumberOfInnerFields(payloadTy, expansion);
+      if (payloadFields > maxEnumCount) {
+        maxEnumCount = payloadFields;
       }
     }
     fieldsCount = fieldsCountBefore + maxEnumCount;
@@ -6024,17 +6025,35 @@ static void countNumberOfInnerFields(unsigned &fieldsCount, TypeConverter &TC,
   }
 }
 
-unsigned TypeConverter::countNumberOfFields(SILType Ty,
-                                            TypeExpansionContext expansion) {
+// The raw (may be zero) number of fields of Ty, memoized per type.
+//
+// Subtypes are counted through this memoized entry point as well, so a type
+// shared by several positions of the enclosing type (e.g. the AD
+// branch-tracing pred-enum chains, where both arms of a branch reference the
+// same predecessor enum) is only ever expanded once instead of once per
+// position — the naive per-position recursion is exponential in the number of
+// shared positions. Re-entering a type that is currently being counted (a
+// genuinely recursive type) contributes zero fields, breaking the cycle.
+unsigned TypeConverter::countRawNumberOfInnerFields(
+    SILType Ty, TypeExpansionContext expansion) {
   auto key = std::make_pair(Ty, unsigned(expansion.getResilienceExpansion()));
   auto Iter = TypeFields.find(key);
   if (Iter != TypeFields.end()) {
-    return std::max(Iter->second, 1U);
+    return Iter->second;
   }
+  bool firstTime = TypeFieldsInProgress.insert(Ty).second;
   unsigned fieldsCount = 0;
-  countNumberOfInnerFields(fieldsCount, *this, Ty, expansion);
-  TypeFields[key] = fieldsCount;
-  return std::max(fieldsCount, 1U);
+  if (firstTime) {
+    countNumberOfInnerFields(fieldsCount, *this, Ty, expansion);
+    TypeFieldsInProgress.erase(Ty);
+    TypeFields[key] = fieldsCount;
+  }
+  return fieldsCount;
+}
+
+unsigned TypeConverter::countNumberOfFields(SILType Ty,
+                                            TypeExpansionContext expansion) {
+  return std::max(countRawNumberOfInnerFields(Ty, expansion), 1U);
 }
 
 uint16_t FunctionType::getPointerAuthDiscriminator(
