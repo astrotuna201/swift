@@ -108,7 +108,8 @@ std::string DifferentiationMangler::mangleLinearMap(
 static NodePointer mangleDerivativeFunctionSubsetParametersThunkAsNode(
     StringRef originalName, Type toType, Demangle::AutoDiffFunctionKind kind,
     IndexSubset *fromParamIndices, IndexSubset *fromResultIndices,
-    IndexSubset *toParamIndices, Demangler &demangler) {
+    IndexSubset *toParamIndices, IndexSubset *toResultIndices,
+    Demangler &demangler) {
   assert(isMangledName(originalName));
   auto demangledOrig = demangler.demangleSymbol(originalName);
   assert(demangledOrig && "Should only be called when the original "
@@ -141,6 +142,10 @@ static NodePointer mangleDerivativeFunctionSubsetParametersThunkAsNode(
       demangler.createNode(
           Node::Kind::IndexSubset, toParamIndices->getString()),
       demangler);
+  thunk->addChild(
+      demangler.createNode(
+          Node::Kind::IndexSubset, toResultIndices->getString()),
+      demangler);
   auto root = demangler.createNode(Node::Kind::Global);
   root->addChild(thunk, demangler);
   return root;
@@ -151,7 +156,7 @@ DifferentiationMangler::mangleDerivativeFunctionSubsetParametersThunk(
     StringRef originalName, CanType toType,
     AutoDiffDerivativeFunctionKind linearMapKind,
     IndexSubset *fromParamIndices, IndexSubset *fromResultIndices,
-    IndexSubset *toParamIndices) {
+    IndexSubset *toParamIndices, IndexSubset *toResultIndices) {
   beginMangling();
   auto kind = getAutoDiffFunctionKind(linearMapKind);
   // If the original function is mangled, mangle the tree.
@@ -159,7 +164,7 @@ DifferentiationMangler::mangleDerivativeFunctionSubsetParametersThunk(
     Demangler demangler;
     auto node = mangleDerivativeFunctionSubsetParametersThunkAsNode(
         originalName, toType, kind, fromParamIndices, fromResultIndices,
-        toParamIndices, demangler);
+        toParamIndices, toResultIndices, demangler);
     auto mangling = Demangle::mangleNode(node, Flavor);
     assert(mangling.isSuccess());
     return mangling.result();
@@ -176,16 +181,19 @@ DifferentiationMangler::mangleDerivativeFunctionSubsetParametersThunk(
   appendIndexSubset(fromResultIndices);
   appendOperator("r");
   appendIndexSubset(toParamIndices);
+  appendOperator("R");
+  appendIndexSubset(toResultIndices);
   appendOperator("P");
   return finalize();
 }
 
 std::string DifferentiationMangler::mangleLinearMapSubsetParametersThunk(
-    CanType fromType, AutoDiffLinearMapKind linearMapKind,
+    CanType fromType, CanType toType, AutoDiffLinearMapKind linearMapKind,
     IndexSubset *fromParamIndices, IndexSubset *fromResultIndices,
-    IndexSubset *toParamIndices) {
+    IndexSubset *toParamIndices, IndexSubset *toResultIndices) {
   beginMangling();
   appendType(fromType, nullptr);
+  appendType(toType, nullptr);
   auto functionKindCode = (char)getAutoDiffFunctionKind(linearMapKind);
   appendOperator("TJS", StringRef(&functionKindCode, 1));
   appendIndexSubset(fromParamIndices);
@@ -193,6 +201,8 @@ std::string DifferentiationMangler::mangleLinearMapSubsetParametersThunk(
   appendIndexSubset(fromResultIndices);
   appendOperator("r");
   appendIndexSubset(toParamIndices);
+  appendOperator("R");
+  appendIndexSubset(toResultIndices);
   appendOperator("P");
   return finalize();
 }

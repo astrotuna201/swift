@@ -2346,14 +2346,27 @@ NodePointer NodePrinter::print(NodePointer Node, unsigned depth,
     return nullptr;
   }
   case Node::Kind::AutoDiffSubsetParametersThunk: {
-    // The four trailing children are the kind and three index subsets, and at
-    // least one child ahead of them names the thing being thunked.
+    // The trailing children are the kind and three or four index subsets
+    // (the "to" result indices are only present in newer mangled names), and
+    // at least one child ahead of them names the thing being thunked.
     if (Node->getNumChildren() < 5) {
       setInvalid();
       return nullptr;
     }
     Printer << "autodiff subset parameters thunk for ";
+    // Locate the kind child; the index subsets follow it. Newer mangled names
+    // carry four subsets (with the "to" result indices last), older ones
+    // three.
+    unsigned kindIndex = 0;
+    for (unsigned i = 0; i < Node->getNumChildren(); ++i)
+      if (Node->getChild(i)->getKind() == Node::Kind::AutoDiffFunctionKind)
+        kindIndex = i;
+    NodePointer toResultIndices = nullptr;
+    if (Node->getNumChildren() - kindIndex - 1 == 4)
+      toResultIndices = Node->getLastChild();
     auto currentIndex = Node->getNumChildren() - 1;
+    if (toResultIndices)
+      currentIndex--;
     auto toParamIndices = Node->getChild(currentIndex--);
     auto resultIndices = Node->getChild(currentIndex--);
     auto paramIndices = Node->getChild(currentIndex--);
@@ -2375,6 +2388,10 @@ NodePointer NodePrinter::print(NodePointer Node, unsigned depth,
     print(resultIndices, depth + 1);
     Printer << " to parameters ";
     print(toParamIndices, depth + 1);
+    if (toResultIndices) {
+      Printer << " and results ";
+      print(toResultIndices, depth + 1);
+    }
     if (currentIndex > 0) {
       Printer << " of type ";
       print(Node->getChild(currentIndex), depth + 1); // "to" type

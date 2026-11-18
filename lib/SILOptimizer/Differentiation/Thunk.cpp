@@ -457,11 +457,13 @@ getOrCreateSubsetParametersThunkForLinearMap(
   Mangle::DifferentiationMangler mangler(parentThunk->getASTContext());
   auto fromInterfaceType =
       linearMapType->mapTypeOutOfEnvironment()->getCanonicalType();
+  auto toInterfaceType =
+      targetType->mapTypeOutOfEnvironment()->getCanonicalType();
 
   auto thunkName = mangler.mangleLinearMapSubsetParametersThunk(
-      fromInterfaceType, kind.getLinearMapKind(),
+      fromInterfaceType, toInterfaceType, kind.getLinearMapKind(),
       actualConfig.parameterIndices, actualConfig.resultIndices,
-      desiredConfig.parameterIndices);
+      desiredConfig.parameterIndices, desiredConfig.resultIndices);
 
   auto loc = parentThunk->getLocation();
   auto *thunk = fb.getOrCreateSharedFunction(
@@ -813,7 +815,7 @@ getOrCreateSubsetParametersThunkForDerivativeFunction(
   auto thunkName = mangler.mangleDerivativeFunctionSubsetParametersThunk(
       origName, targetType->mapTypeOutOfEnvironment()->getCanonicalType(),
       kind, actualConfig.parameterIndices, actualConfig.resultIndices,
-      desiredConfig.parameterIndices);
+      desiredConfig.parameterIndices, desiredConfig.resultIndices);
 
   auto loc = origFnOperand.getLoc();
   auto *thunk = fb.getOrCreateSharedFunction(

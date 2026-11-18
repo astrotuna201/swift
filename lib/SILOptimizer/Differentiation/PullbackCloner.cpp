@@ -2404,21 +2404,33 @@ bool PullbackCloner::Implementation::run() {
   // Collect original formal results.
   SmallVector<SILValue, 8> origFormalResults;
   collectAllFormalResultsInTypeOrder(original, origFormalResults);
+  // If all requested results are non-varied, every derivative is zero. Skip
+  // full pullback generation and simply emit zero derivatives for wrt
+  // parameters.
+  //
+  // The shortcut must not fire when only *some* requested results are
+  // non-varied: the pullback still has to propagate the cotangents of the
+  // varied results (a non-varied result's cotangent simply contributes
+  // nothing). Firing on any non-varied result here drops the varied results'
+  // cotangents and miscompiles (see f2-ad-crasher Finding 2).
+  //
+  // NOTE(TF-876): This shortcut is currently necessary for functions
+  // whose requested results are all non-varied and which have >1 basic block
+  // where some basic blocks have no dominated active values; control flow
+  // differentiation does not handle this case. See TF-876 for context. When
+  // at least one requested result is varied, some wrt parameter is active, and
+  // active wrt parameters dominate every block, so that case cannot occur.
+  bool allRequestedResultsNonvaried = true;
   for (auto resultIndex : getConfig().resultIndices->getIndices()) {
     auto origResult = origFormalResults[resultIndex];
-    // If original result is non-varied, it will always have a zero derivative.
-    // Skip full pullback generation and simply emit zero derivatives for wrt
-    // parameters.
-    //
-    // NOTE(TF-876): This shortcut is currently necessary for functions
-    // returning non-varied result with >1 basic block where some basic blocks
-    // have no dominated active values; control flow differentiation does not
-    // handle this case. See TF-876 for context.
-    if (!getActivityInfo().isVaried(origResult, getConfig().parameterIndices)) {
-      emitZeroDerivativesForNonvariedResult(origResult);
-      completeAndLowerPullback();
-      return false;
-    }
+    if (getActivityInfo().isVaried(origResult, getConfig().parameterIndices))
+      allRequestedResultsNonvaried = false;
+  }
+  if (allRequestedResultsNonvaried) {
+    emitZeroDerivativesForNonvariedResult(
+        origFormalResults[*getConfig().resultIndices->getIndices().begin()]);
+    completeAndLowerPullback();
+    return false;
   }
 
   // Collect dominated active values in original basic blocks.

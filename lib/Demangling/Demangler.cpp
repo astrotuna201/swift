@@ -3377,6 +3377,11 @@ NodePointer Demangler::demangleAutoDiffSubsetParametersThunk() {
   if (!nextIf('r'))
     return nullptr;
   result = addChild(result, demangleIndexSubset());
+  // The "to" result indices were added to the mangled name after the "to"
+  // parameter indices; accept both the new form ('R' <subset>) and the older
+  // form without it, so names produced by earlier compilers still demangle.
+  if (nextIf('R'))
+    result = addChild(result, demangleIndexSubset());
   if (!nextIf('P'))
     return nullptr;
   return result;

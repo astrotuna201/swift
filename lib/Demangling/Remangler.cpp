@@ -3187,6 +3187,11 @@ ManglingError Remangler::mangleAutoDiffSubsetParametersThunk(Node *node,
   RETURN_IF_ERROR(mangle(*childIt++, depth + 1)); // result indices
   Buffer << 'r';
   RETURN_IF_ERROR(mangle(*childIt++, depth + 1)); // to parameter indices
+  // The "to" result indices child is only present in newer mangled names.
+  if (childIt != node->end()) {
+    Buffer << 'R';
+    RETURN_IF_ERROR(mangle(*childIt++, depth + 1)); // to result indices
+  }
   Buffer << 'P';
   return ManglingError::Success;
 }
